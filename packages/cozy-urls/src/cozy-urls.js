@@ -9,24 +9,30 @@ const ERROR_DOMAIN_URL_INVALID = `[cozy-urls] Can't find domain for`
 let cozyURL
 
 export const getBrowserCozyURL = () => {
-  if (cozyURL) return cozyURL
+  if (!cozyURL) {
+    try {
+      const root = document.querySelector('[role=application]')
+      const data = root.dataset
 
-  try {
-    const root = document.querySelector('[role=application]')
-    const data = root.dataset
-
-    return new URL(`${window.location.protocol}//${data.cozyDomain}`)
-  } catch (e) {
-    throw new Error(ERROR_DOMAIN_BROWSER)
+      cozyURL = new URL(`${window.location.protocol}//${data.cozyDomain}`)
+    } catch (e) {
+      throw new Error(ERROR_DOMAIN_BROWSER)
+    }
   }
+
+  return cozyURL
 }
 
 export const getNodeCozyURL = () => {
-  try {
-    return new URL(process.env.COZY_URL)
-  } catch (e) {
-    throw new Error(ERROR_DOMAIN_NODE)
+  if (!cozyURL) {
+    try {
+      cozyURL = new URL(process.env.COZY_URL)
+    } catch (e) {
+      throw new Error(ERROR_DOMAIN_NODE)
+    }
   }
+
+  return cozyURL
 }
 
 export const getCozyURL = () =>
