@@ -37,6 +37,10 @@ const optionConfigs = {
   transformRegenerator: {
     default: true,
     validator: isOfType('boolean')
+  },
+  presetEnv: {
+    default: {},
+    validator: isOfType('object')
   }
 }
 
@@ -56,13 +60,14 @@ module.exports = declare((api, options) => {
     throw e
   }
 
-  const { node, react, transformRegenerator } = presetOptions
+  const { node, react, transformRegenerator, presetEnv } = presetOptions
 
   const config = {}
 
   // Latest ECMAScript features on previous browsers versions
   const presetEnvOptions = {
-    ...(node ? presetEnvNodeOptions : presetEnvBrowserOptions)
+    ...(node ? presetEnvNodeOptions : presetEnvBrowserOptions),
+    ...presetEnv
   }
 
   config.presets = [
