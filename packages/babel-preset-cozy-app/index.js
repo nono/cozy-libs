@@ -12,12 +12,12 @@ const mapValues = (obj, iter) => {
   return res
 }
 
-const browserEnv = {
+const presetEnvBrowserOptions = {
   targets: browserslist,
   useBuiltIns: false
 }
 
-const nodeEnv = {
+const presetEnvNodeOptions = {
   targets: {
     node: 8
   },
@@ -61,17 +61,15 @@ module.exports = declare((api, options) => {
   const config = {}
 
   // Latest ECMAScript features on previous browsers versions
-  let env = [require.resolve('@babel/preset-env')]
-  if (node) {
-    env.push(nodeEnv)
-  } else {
-    env.push(browserEnv)
+  const presetEnvOptions = {
+    ...(node ? presetEnvNodeOptions : presetEnvBrowserOptions)
   }
 
-  let presets = [env]
-  // if (P)React app
-  if (!node && react) presets.push(require.resolve('@babel/preset-react'))
-  config.presets = presets
+  config.presets = [
+    [require.resolve('@babel/preset-env'), presetEnvOptions],
+    // if (P)React app
+    !node && react ? require.resolve('@babel/preset-react') : null
+  ].filter(Boolean)
 
   const plugins = [
     // transform class attributes and methods with auto-binding
