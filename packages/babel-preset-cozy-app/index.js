@@ -3,6 +3,7 @@
 const { declare } = require('@babel/helper-plugin-utils')
 const browserslist = require('browserslist-config-cozy')
 const { validate, isOfType } = require('./validate')
+const merge = require('lodash/merge')
 
 const mapValues = (obj, iter) => {
   const res = {}
@@ -41,6 +42,13 @@ const optionConfigs = {
   presetEnv: {
     default: {},
     validator: isOfType('object')
+  },
+  transformRuntime: {
+    default: {
+      helpers: false,
+      regenerator: true
+    },
+    validator: isOfType('object')
   }
 }
 
@@ -48,10 +56,7 @@ const validators = mapValues(optionConfigs, x => x.validator)
 const defaultOptions = mapValues(optionConfigs, x => x.default)
 
 const mkConfig = (api, options) => {
-  const presetOptions = {
-    ...defaultOptions,
-    ...options
-  }
+  const presetOptions = merge(defaultOptions, options)
 
   try {
     validate(presetOptions, validators)
@@ -60,7 +65,13 @@ const mkConfig = (api, options) => {
     throw e
   }
 
-  const { node, react, transformRegenerator, presetEnv } = presetOptions
+  const {
+    node,
+    react,
+    presetEnv,
+    transformRuntime,
+    transformRegenerator
+  } = presetOptions
 
   const config = {}
 
@@ -93,13 +104,7 @@ const mkConfig = (api, options) => {
   if (!node && transformRegenerator) {
     plugins.push(
       // Polyfills generator functions (for async/await usage)
-      [
-        require.resolve('@babel/plugin-transform-runtime'),
-        {
-          helpers: false,
-          regenerator: true
-        }
-      ]
+      [require.resolve('@babel/plugin-transform-runtime'), transformRuntime]
     )
   }
   config.plugins = plugins
