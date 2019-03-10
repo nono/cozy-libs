@@ -47,7 +47,7 @@ const optionConfigs = {
 const validators = mapValues(optionConfigs, x => x.validator)
 const defaultOptions = mapValues(optionConfigs, x => x.default)
 
-module.exports = declare((api, options) => {
+const mkConfig = (api, options) => {
   const presetOptions = {
     ...defaultOptions,
     ...options
@@ -104,4 +104,11 @@ module.exports = declare((api, options) => {
   }
   config.plugins = plugins
   return config
-})
+}
+
+module.exports = declare(mkConfig)
+
+if (require.main === module) {
+  // eslint-disable-next-line no-console
+  console.log(JSON.stringify(mkConfig(null, {}), null, 2))
+}
